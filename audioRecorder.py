@@ -1,4 +1,4 @@
-# Below python codes copied from pyaudio official documentation. 
+# Some of the below python codes copied from pyaudio official documentation. 
 # https://people.csail.mit.edu/hubert/pyaudio/#record-example
 
 import wave
@@ -6,11 +6,12 @@ import sys
 
 import pyaudio
 
+import keyboard 
+
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1 if sys.platform == 'darwin' else 2
 RATE = 44100
-RECORD_SECONDS = 5
 
 with wave.open('output.wav', 'wb') as wf:
     p = pyaudio.PyAudio()
@@ -20,10 +21,16 @@ with wave.open('output.wav', 'wb') as wf:
 
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
 
-    print('Recording...')
-    for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
-        wf.writeframes(stream.read(CHUNK))
-    print('Done')
+    isStartting = input("Start Recording by hitting 't':")
+    
+    if isStartting == "t":
+
+        print("To Stop Recording Press 't' !")
+
+        while True:
+            wf.writeframes(stream.read(CHUNK))
+            if keyboard.is_pressed("t"):
+                break
 
     stream.close()
     p.terminate()
