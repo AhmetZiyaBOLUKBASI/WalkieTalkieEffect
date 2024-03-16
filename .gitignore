@@ -1,2 +1,4 @@
 *.wav
+!beep.wav
 test*
+/__pycache__/
