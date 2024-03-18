@@ -12,7 +12,13 @@ from datetime import datetime
 
 class WalkieTalkie():
 
+
     def __init__(self,outFileName):
+
+        # Initialization function. In the function user records voice like
+        # "<filename-2024xxxx.wav" file. After the records ends, add_radio_effect
+        # function calls and original record editing.
+
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
         CHANNELS = 1 if sys.platform == 'darwin' else 2
@@ -35,10 +41,14 @@ class WalkieTalkie():
             event = keyboard.read_event()
 
             if event.event_type == keyboard.KEY_DOWN and event.name == 'space':
+                
+                # We wait for cleaning keyboard buffer below while loop.
                 while keyboard.is_pressed("space") :
                     pass
+
                 print("To Stop Recording Please Press 'Space' !")
                 print("Recording ...")
+
                 while True:
                     wf.writeframes(stream.read(CHUNK))
                     if keyboard.is_pressed("space"):
@@ -49,15 +59,19 @@ class WalkieTalkie():
             stream.close()
             p.terminate()
 
-        self.originalRecord = originalRecord
+        self.__originalRecord = originalRecord
 
         self.add_radio_effect()
 
     def add_radio_effect(self):
-        # Load the input audio file
-        sound = AudioSegment.from_wav(self.originalRecord)
+        # This function first applied 7,5 kHz High-Pass Filter, then amplified
+        # 12 dB, and finally added white noise after this process beep sound was added 
+        # at the beginning and the end of the speech. 
 
-        # High Pass Filter cut-off Frequency is 7500 kHz and 12 dB Amplifiyer
+        # Load the input audio file
+        sound = AudioSegment.from_wav(self.__originalRecord)
+
+        # High Pass Filter cut-off Frequency is 7500 Hz and 12 dB Amplifiyer
 
         sound_highpass = sound.high_pass_filter(7500) + 12
 
@@ -76,24 +90,26 @@ class WalkieTalkie():
 
         radio_sound = beep_sound + radio_sound + beep_sound
 
-        outEffectFile = self.originalRecord.split("-")[0] + "-radio-" + self.originalRecord.split("-")[1]
+        outEffectFile = self.__originalRecord.split("-")[0] + "-radio-" + self.__originalRecord.split("-")[1]
 
         # Export the modified audio to a new file
         radio_sound.export(outEffectFile, format="wav")
 
-        self.radioEffectRecord = outEffectFile
+        self.__radioEffectRecord = outEffectFile
 
     def playRecord(self,recordType) :
+        # In this function, we play our records. If we call <object name>playRecord("original")
+        # ıt plays our first record. If we call <object name>playRecord("radio").
 
         CHUNK = 1024
 
         if recordType == "original" :
 
-            recordFile = self.originalRecord
+            recordFile = self.__originalRecord
         
         elif recordType == "radio" :
 
-            recordFile = self.radioEffectRecord
+            recordFile = self.__radioEffectRecord
 
         else : 
 
